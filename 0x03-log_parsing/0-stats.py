@@ -2,47 +2,42 @@
 
 import sys
 
-
 def print_statistics(status_codes, total_file_size):
     """
-    Print statistics.
-    
+    Function to print file size and status code statistics
     Args:
-        status_codes (dict): Dictionary of status codes and their counts.
-        total_file_size (int): Total file size.
+        status_codes: dictionary of status codes
+        total_file_size: total size of files
+    Returns:
+        None
     """
     print("Total File Size: {}".format(total_file_size))
     for code, count in sorted(status_codes.items()):
         if count != 0:
-            print("Status Code {}: {}".format(code, count))
+            print("{}: {}".format(code, count))
 
+total_file_size = 0
+status_codes = {"200": 0, "301": 0, "400": 0, "401": 0, "403": 0, "404": 0, "405": 0, "500": 0}
 
-def main():
-    total_file_size = 0
-    status_codes = {"200": 0, "301": 0, "400": 0, "401": 0, "403": 0, "404": 0, "405": 0, "500": 0}
-    line_count = 0
+try:
+    line_counter = 0
+    for line in sys.stdin:
+        parsed_line = line.split()
+        parsed_line = parsed_line[::-1]
 
-    try:
-        for line in sys.stdin:
-            line_count += 1
-            if line_count > 10:
-                break
+        if len(parsed_line) > 2:
+            line_counter += 1
 
-            parts = line.split()
-            if len(parts) >= 2:
-                total_file_size += int(parts[-2])  # Assuming file size is before status code
-                status_code = parts[-1]  # Assuming status code is the last element
+            if line_counter <= 10:
+                total_file_size += int(parsed_line[0])
+                status_code = parsed_line[1]
+
                 if status_code in status_codes:
                     status_codes[status_code] += 1
 
-    except Exception as e:
-        print("Error:", e)
-        sys.exit(1)
+            if line_counter == 10:
+                print_statistics(status_codes, total_file_size)
+                line_counter = 0
 
-    finally:
-        print_statistics(status_codes, total_file_size)
-
-
-if __name__ == "__main__":
-    main()
-
+finally:
+    print_statistics(status_codes, total_file_size)
